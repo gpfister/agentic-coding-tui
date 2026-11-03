@@ -2,12 +2,12 @@
 
 import pytest
 
-from agentic_code_tui.agents.factory import AgentFactory
-from agentic_code_tui.core.tools import ToolRegistry, execute_read_file, execute_write_file
-from agentic_code_tui.ui.dialogs import AskQuestionDialog
-from agentic_code_tui.ui.prompt_input import TopPromptInput
-from agentic_code_tui.ui.status_bar import TaskSubagentFooter
-from agentic_code_tui.ui.transcript import TranscriptStream
+from agentic_coding_tui.agents.factory import AgentFactory
+from agentic_coding_tui.core.tools import ToolRegistry, execute_read_file, execute_write_file
+from agentic_coding_tui.ui.dialogs import AskQuestionDialog
+from agentic_coding_tui.ui.prompt_input import TopPromptInput
+from agentic_coding_tui.ui.status_bar import TaskSubagentFooter
+from agentic_coding_tui.ui.transcript import TranscriptStream
 
 
 def test_tool_registry_excludes_invoke_agent():

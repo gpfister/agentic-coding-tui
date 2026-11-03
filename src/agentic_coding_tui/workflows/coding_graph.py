@@ -7,10 +7,10 @@ from collections.abc import AsyncIterator
 
 from google.adk.workflow import START, Edge, FunctionNode, Workflow
 
-from agentic_code_tui.config import ConfigManager
-from agentic_code_tui.core.dispatcher import DispatchEvent
-from agentic_code_tui.core.tools import ToolRegistry
-from agentic_code_tui.workflows.rules import (
+from agentic_coding_tui.config import ConfigManager
+from agentic_coding_tui.core.dispatcher import DispatchEvent
+from agentic_coding_tui.core.tools import ToolRegistry
+from agentic_coding_tui.workflows.rules import (
     WorkflowPhase,
     WorkflowRules,
     WorkflowState,

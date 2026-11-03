@@ -17,7 +17,7 @@ wheels = [
 ]
 
 [[package]]
-name = "agentic-code-tui"
+name = "agentic-coding-tui"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

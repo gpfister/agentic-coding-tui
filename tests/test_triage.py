@@ -1,6 +1,6 @@
 """Unit tests for Laya Router prompt intent triage."""
 
-from agentic_code_tui.core.triage import TriageEngine, sanitize_prompt
+from agentic_coding_tui.core.triage import TriageEngine, sanitize_prompt
 
 
 def test_sanitize_prompt():

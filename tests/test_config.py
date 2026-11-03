@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from agentic_code_tui.config import AgentModelConfig, ConfigManager
+from agentic_coding_tui.config import AgentModelConfig, ConfigManager
 
 
 def test_agent_model_config_defaults():

@@ -7,9 +7,9 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from agentic_code_tui.config import ConfigManager
-from agentic_code_tui.core.tools import ToolRegistry
-from agentic_code_tui.core.triage import TriageEngine, TriageResult
+from agentic_coding_tui.config import ConfigManager
+from agentic_coding_tui.core.tools import ToolRegistry
+from agentic_coding_tui.core.triage import TriageEngine, TriageResult
 
 
 class DispatchEvent(BaseModel):
@@ -42,7 +42,7 @@ class RootDispatcher:
         """Process local slash commands."""
         clean = cmd.strip()
         if clean in ("/exit", "/quit"):
-            return DispatchEvent(event_type="app_exit", content="Exiting agentic-code-tui...")
+            return DispatchEvent(event_type="app_exit", content="Exiting agentic-coding-tui...")
         if clean == "/clear":
             return DispatchEvent(event_type="app_clear", content="Transcript cleared.")
         if clean == "/help":
@@ -123,7 +123,7 @@ class RootDispatcher:
 
         if triage_res.intent == "coding":
             # Invoke google-adk Workflow Graph
-            from agentic_code_tui.workflows.coding_graph import CodingWorkflowOrchestrator
+            from agentic_coding_tui.workflows.coding_graph import CodingWorkflowOrchestrator
 
             orchestrator = CodingWorkflowOrchestrator(
                 config_manager=self.config_manager,
@@ -134,7 +134,7 @@ class RootDispatcher:
             return
 
         # Other Antigravity agents
-        from agentic_code_tui.agents.factory import AgentFactory
+        from agentic_coding_tui.agents.factory import AgentFactory
 
         factory = AgentFactory(config_manager=self.config_manager, tool_registry=self.tool_registry)
         agent = factory.create_domain_agent(triage_res.intent)

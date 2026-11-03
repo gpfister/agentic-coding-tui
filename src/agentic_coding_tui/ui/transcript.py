@@ -52,7 +52,7 @@ class TranscriptStream(VerticalScroll):
 
     def compose(self) -> ComposeResult:
         yield Markdown(
-            "### 🚀 Welcome to **agentic-code-tui**\n"
+            "### 🚀 Welcome to **agentic-coding-tui**\n"
             "Autonomous coding assistant powered by **Google Antigravity** & **Google ADK**.\n"
             "Type your request in the top input box or `/help` for options.\n",
             classes="agent-message",

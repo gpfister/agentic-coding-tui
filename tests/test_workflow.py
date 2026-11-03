@@ -2,8 +2,8 @@
 
 import pytest
 
-from agentic_code_tui.workflows.coding_graph import CodingWorkflowOrchestrator
-from agentic_code_tui.workflows.rules import (
+from agentic_coding_tui.workflows.coding_graph import CodingWorkflowOrchestrator
+from agentic_coding_tui.workflows.rules import (
     TransitionRuleError,
     WorkflowPhase,
     WorkflowRules,

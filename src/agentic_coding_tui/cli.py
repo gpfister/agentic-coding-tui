@@ -6,14 +6,14 @@ import argparse
 import sys
 from pathlib import Path
 
-from agentic_code_tui.app import AgenticCodeTUIApp
-from agentic_code_tui.config import ConfigManager
+from agentic_coding_tui.app import AgenticCodeTUIApp
+from agentic_coding_tui.config import ConfigManager
 
 
 def main() -> int:
     """Parse arguments and start the Textual application."""
     parser = argparse.ArgumentParser(
-        prog="agentic-code-tui",
+        prog="coding",
         description="Terminal-native AI coding assistant combining Google Antigravity & ADK",
     )
     parser.add_argument(
@@ -26,7 +26,7 @@ def main() -> int:
         "--version",
         "-v",
         action="version",
-        version="agentic-code-tui 0.1.0",
+        version="coding 0.1.0",
     )
 
     args = parser.parse_args()

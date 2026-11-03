@@ -1,1 +1,1 @@
-"""Unit test suite for agentic-code-tui."""
+"""Unit test suite for agentic-coding-tui."""

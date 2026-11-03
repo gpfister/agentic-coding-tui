@@ -7,12 +7,12 @@ import asyncio
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 
-from agentic_code_tui.config import ConfigManager
-from agentic_code_tui.core.dispatcher import RootDispatcher
-from agentic_code_tui.ui.dialogs import AskQuestionDialog
-from agentic_code_tui.ui.prompt_input import TopPromptInput
-from agentic_code_tui.ui.status_bar import TaskSubagentFooter
-from agentic_code_tui.ui.transcript import TranscriptStream
+from agentic_coding_tui.config import ConfigManager
+from agentic_coding_tui.core.dispatcher import RootDispatcher
+from agentic_coding_tui.ui.dialogs import AskQuestionDialog
+from agentic_coding_tui.ui.prompt_input import TopPromptInput
+from agentic_coding_tui.ui.status_bar import TaskSubagentFooter
+from agentic_coding_tui.ui.transcript import TranscriptStream
 
 
 class AgenticCodeTUIApp(App):

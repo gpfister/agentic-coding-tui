@@ -1,4 +1,4 @@
-# Agentic Code TUI Makefile
+# Agentic Coding TUI Makefile
 SHELL := /bin/bash
 VENV := .venv
 PYTHON := $(VENV)/bin/python
@@ -9,7 +9,7 @@ UV := uv
 all: help
 
 help:
-	@echo "Agentic Code TUI Commands:"
+	@echo "Agentic Coding TUI Commands:"
 	@echo "  make setup    - Create virtualenv and install dependencies"
 	@echo "  make run      - Launch the TUI application"
 	@echo "  make test     - Run unit test suite with pytest"
@@ -21,7 +21,7 @@ setup:
 	$(UV) sync
 
 run:
-	$(PYTHON) -m agentic_code_tui
+	$(PYTHON) -m agentic_coding_tui
 
 test:
 	$(PYTHON) -m pytest tests/ -v

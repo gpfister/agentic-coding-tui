@@ -6,8 +6,8 @@ from typing import Any
 
 from google.antigravity import Agent, LocalAgentConfig
 
-from agentic_code_tui.config import ConfigManager
-from agentic_code_tui.core.tools import ToolRegistry
+from agentic_coding_tui.config import ConfigManager
+from agentic_coding_tui.core.tools import ToolRegistry
 
 
 class AgentFactory:
@@ -40,27 +40,27 @@ class AgentFactory:
     def create_domain_agent(self, intent: str) -> Any | None:
         """Instantiate domain worker agent corresponding to intent."""
         if intent == "investigation":
-            from agentic_code_tui.agents.investigate import IssueInvestigationAgent
+            from agentic_coding_tui.agents.investigate import IssueInvestigationAgent
 
             return IssueInvestigationAgent(self.config_manager, self.tool_registry)
 
         if intent == "monitoring":
-            from agentic_code_tui.agents.monitor import TaskMonitoringAgent
+            from agentic_coding_tui.agents.monitor import TaskMonitoringAgent
 
             return TaskMonitoringAgent(self.config_manager, self.tool_registry)
 
         if intent == "research":
-            from agentic_code_tui.agents.research import TopicResearchAgent
+            from agentic_coding_tui.agents.research import TopicResearchAgent
 
             return TopicResearchAgent(self.config_manager, self.tool_registry)
 
         if intent == "documentation":
-            from agentic_code_tui.agents.document import DocumentationAgent
+            from agentic_coding_tui.agents.document import DocumentationAgent
 
             return DocumentationAgent(self.config_manager, self.tool_registry)
 
         if intent == "grooming":
-            from agentic_code_tui.agents.grooming import ProjectGroomingAgent
+            from agentic_coding_tui.agents.grooming import ProjectGroomingAgent
 
             return ProjectGroomingAgent(self.config_manager, self.tool_registry)
 

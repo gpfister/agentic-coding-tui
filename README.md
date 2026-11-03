@@ -1,10 +1,10 @@
-# `agentic-code-tui`
+# `agentic-coding-tui`
 
 > Terminal-native AI coding assistant combining Google Antigravity and Google ADK workflows.
 
 ## Overview
 
-`agentic-code-tui` is a standalone, full-screen Terminal User Interface (TUI) application designed for autonomous software engineering, issue diagnostics, stream surveillance, and technical documentation. It provides a cohesive desktop-like terminal experience built on:
+`agentic-coding-tui` is a standalone, full-screen Terminal User Interface (TUI) application designed for autonomous software engineering, issue diagnostics, stream surveillance, and technical documentation. It provides a cohesive desktop-like terminal experience built on:
 
 - **Textual**: Asynchronous, reactive CSS-styled terminal UI engine.
 - **Google ADK (`google-adk`)**: Deterministic graph workflow orchestrator managing the 6-stage coding lifecycle (`clarify -> specify -> plan -> develop -> review -> merge`).
