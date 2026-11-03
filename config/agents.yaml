@@ -1,0 +1,60 @@
+# Agent Model & Generation Configurations
+default:
+  model: "gemini-2.5-flash"
+  temperature: 0.2
+  seed: 42
+  thinking_budget: 0
+
+agents:
+  root_triage:
+    model: "gemini-2.5-flash"
+    temperature: 0.0
+    seed: 42
+  coding_orchestrator:
+    model: "gemini-3.8-pro"
+    temperature: 0.2
+    seed: 100
+  coding_clarify:
+    model: "gemini-2.5-flash"
+    temperature: 0.2
+    seed: 100
+  coding_specify:
+    model: "gemini-3.8-pro"
+    temperature: 0.1
+    seed: 100
+  coding_plan:
+    model: "gemini-3.8-pro"
+    temperature: 0.1
+    seed: 100
+  coding_develop:
+    model: "gemini-3.8-pro"
+    temperature: 0.1
+    seed: 200
+  coding_review:
+    model: "gemini-3.8-pro"
+    temperature: 0.0
+    seed: 300
+  coding_merge:
+    model: "gemini-2.5-flash"
+    temperature: 0.0
+    seed: 350
+  coding_investigate:
+    model: "gemini-3.8-pro"
+    temperature: 0.1
+    seed: 400
+  coding_research:
+    model: "gemini-2.5-flash"
+    temperature: 0.3
+    seed: 500
+  coding_document:
+    model: "gemini-2.5-flash"
+    temperature: 0.2
+    seed: 600
+  coding_monitor:
+    model: "gemini-2.5-flash"
+    temperature: 0.0
+    seed: 700
+  project_grooming:
+    model: "gemini-2.5-flash"
+    temperature: 0.2
+    seed: 800

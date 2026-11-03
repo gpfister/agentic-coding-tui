@@ -1,0 +1,49 @@
+[project]
+name = "agentic-code-tui"
+version = "0.1.0"
+description = "Terminal-native AI coding assistant combining Google Antigravity and Google ADK workflows"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Greg PFISTER", email = "gregory.pfister@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=1.0.0",
+    "google-adk>=2.0.0",
+    "google-antigravity>=0.1.0",
+    "laya>=0.4.15",
+    "pydantic>=2.10.0",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+agentic-code-tui = "agentic_code_tui.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.8.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501", "RUF012"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
