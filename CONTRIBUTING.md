@@ -13,3 +13,4 @@ Thank you for your interest in contributing!
 
 - **Separation of Concerns**: UI widgets live in `src/agentic_coding_tui/ui/`, agent implementations in `src/agentic_coding_tui/agents/`, graph workflows in `src/agentic_coding_tui/workflows/`, and core dispatcher/triage in `src/agentic_coding_tui/core/`.
 - **Approval Gate Discipline**: Artifact approvals (`specification.md`, `plan.md`, etc.) must pause explicitly for human input without timeouts.
+- **Transparent UI Invariant**: Every UI widget and screen must declare `background: transparent;` to preserve pass-through terminal transparency across host emulators (see [ADR-009](file:///Users/gpfister/Development/Projects/gpfister/agentic/agentic-obsidian/architecture/adr-009-tui-transparent-pass-through-rendering.md)). Truecolor syntax highlighting must be preserved without opaque box fills.
