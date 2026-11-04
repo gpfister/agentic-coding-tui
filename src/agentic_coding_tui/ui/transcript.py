@@ -13,38 +13,47 @@ class TranscriptStream(VerticalScroll):
     DEFAULT_CSS = """
     TranscriptStream {
         height: 1fr;
-        background: $background;
+        background: transparent;
         padding: 1 2;
         overflow-y: scroll;
     }
 
+    Markdown,
+    MarkdownBlock,
+    MarkdownFence,
+    MarkdownTable {
+        background: transparent;
+    }
+
     .user-message {
-        background: $boost;
+        background: transparent;
         color: $text;
-        border-left: thick $accent;
-        padding: 1 2;
+        border: none;
+        padding: 0 1;
         margin: 1 0;
     }
 
     .agent-message {
-        background: $surface;
+        background: transparent;
         color: $text;
-        border-left: thick $success;
-        padding: 1 2;
+        border: none;
+        padding: 0 1;
         margin: 1 0;
     }
 
     .thought-block {
-        background: $surface-darken-1;
+        background: transparent;
         color: $text-muted;
-        border-left: thick $warning;
-        padding: 0 2;
+        border: none;
+        padding: 0 1;
         margin: 0 0 1 0;
         text-style: italic;
     }
 
     .system-status {
+        background: transparent;
         color: $text-muted;
+        border: none;
         padding: 0 1;
         margin: 0 0;
     }
@@ -52,9 +61,9 @@ class TranscriptStream(VerticalScroll):
 
     def compose(self) -> ComposeResult:
         yield Markdown(
-            "### 🚀 Welcome to **agentic-coding-tui**\n"
+            "### Welcome to **agentic-coding-tui**\n"
             "Autonomous coding assistant powered by **Google Antigravity** & **Google ADK**.\n"
-            "Type your request in the top input box or `/help` for options.\n",
+            "Type your request in the prompt box below or `/help` for options.\n",
             classes="agent-message",
         )
 
@@ -72,13 +81,13 @@ class TranscriptStream(VerticalScroll):
 
     def add_thought(self, agent_name: str, thought: str) -> None:
         """Add collapsible/italic thought trace."""
-        widget = Static(f"💭 @{agent_name} (thinking): {thought}", classes="thought-block")
+        widget = Static(f"@{agent_name} (thinking): {thought}", classes="thought-block")
         self.mount(widget)
         widget.scroll_visible()
 
     def add_status(self, text: str) -> None:
         """Add inline status event."""
-        widget = Static(f"• {text}", classes="system-status")
+        widget = Static(text, classes="system-status")
         self.mount(widget)
         widget.scroll_visible()
 

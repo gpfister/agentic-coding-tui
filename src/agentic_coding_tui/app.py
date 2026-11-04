@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
+from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 
 from agentic_coding_tui.config import ConfigManager
 from agentic_coding_tui.core.dispatcher import RootDispatcher
 from agentic_coding_tui.ui.dialogs import AskQuestionDialog
-from agentic_coding_tui.ui.prompt_input import TopPromptInput
+from agentic_coding_tui.ui.prompt_input import PromptInput
 from agentic_coding_tui.ui.status_bar import TaskSubagentFooter
 from agentic_coding_tui.ui.transcript import TranscriptStream
 
@@ -19,9 +21,9 @@ class AgenticCodeTUIApp(App):
     """Full-screen Terminal UI for autonomous coding, investigation, and research."""
 
     CSS = """
-    Screen {
+    Screen, AgenticCodeTUIApp {
         layout: vertical;
-        background: $background;
+        background: transparent;
     }
     """
 
@@ -44,13 +46,13 @@ class AgenticCodeTUIApp(App):
         self._current_task: asyncio.Task | None = None
 
     def compose(self) -> ComposeResult:
-        yield TopPromptInput(id="top-input")
         yield TranscriptStream(id="transcript-stream")
+        yield PromptInput(id="prompt-input-box")
         yield TaskSubagentFooter(id="status-footer")
 
     def on_mount(self) -> None:
-        """Focus top input upon launch."""
-        self.query_one("#top-input", TopPromptInput).focus_input()
+        """Focus prompt input upon launch."""
+        self.query_one(PromptInput).focus_input()
 
     def action_clear_screen(self) -> None:
         """Clear the transcript."""
@@ -68,10 +70,9 @@ class AgenticCodeTUIApp(App):
             "System", help_text
         )
 
-    async def on_top_prompt_input_prompt_submitted(
-        self, event: TopPromptInput.PromptSubmitted
-    ) -> None:
-        """Handle prompt submitted from top input."""
+    @on(PromptInput.PromptSubmitted)
+    async def on_prompt_input_prompt_submitted(self, event: PromptInput.PromptSubmitted) -> None:
+        """Handle prompt submitted from prompt input."""
         transcript = self.query_one("#transcript-stream", TranscriptStream)
         footer = self.query_one("#status-footer", TaskSubagentFooter)
 
@@ -81,6 +82,44 @@ class AgenticCodeTUIApp(App):
 
         self._current_task = asyncio.create_task(self._process_dispatch(prompt))
 
+    # Backward compatibility handler reference
+    on_top_prompt_input_prompt_submitted = on_prompt_input_prompt_submitted
+
+    async def _handle_event(
+        self, ev: Any, transcript: TranscriptStream, footer: TaskSubagentFooter, prompt: str = ""
+    ) -> None:
+        """Process and render individual dispatch event."""
+        if ev.event_type == "app_exit":
+            self.exit()
+        elif ev.event_type == "app_clear":
+            self.action_clear_screen()
+        elif ev.event_type == "status":
+            footer.update_status(agent=ev.agent_name, phase=ev.content)
+            transcript.add_status(ev.content)
+        elif ev.event_type == "thought":
+            transcript.add_thought(ev.agent_name or "Agent", ev.content)
+        elif ev.event_type == "message":
+            transcript.add_agent_message(ev.agent_name or "Agent", ev.content)
+        elif ev.event_type == "gate_prompt":
+            footer.update_status(agent=ev.agent_name, phase="Gate Awaiting Decision")
+            transcript.add_agent_message(ev.agent_name or "Agent", ev.content)
+            options = ev.data.get("options") if ev.data else None
+            is_choice = ev.data.get("type") == "choice" if ev.data else False
+            orig_prompt = ev.data.get("prompt", prompt) if ev.data else prompt
+            # Show modal dialog
+            dialog = AskQuestionDialog(
+                question=ev.content,
+                options=options,
+            )
+            user_decision = await self.push_screen_wait(dialog)
+            transcript.add_status(f"Selected option: {user_decision or 'Cancelled'}")
+            # If low confidence choice, pass prompt to the selected agent
+            if is_choice and user_decision:
+                async for ev2 in self.dispatcher.dispatch_to_agent(user_decision, orig_prompt):
+                    await self._handle_event(ev2, transcript, footer, orig_prompt)
+        elif ev.event_type == "done":
+            footer.update_status(agent="IDLE", phase="Awaiting input")
+
     async def _process_dispatch(self, prompt: str) -> None:
         """Stream events from dispatcher to UI widgets."""
         transcript = self.query_one("#transcript-stream", TranscriptStream)
@@ -88,33 +127,7 @@ class AgenticCodeTUIApp(App):
 
         try:
             async for ev in self.dispatcher.dispatch(prompt):
-                if ev.event_type == "app_exit":
-                    self.exit()
-                    return
-                elif ev.event_type == "app_clear":
-                    self.action_clear_screen()
-                elif ev.event_type == "status":
-                    footer.update_status(agent=ev.agent_name, phase=ev.content)
-                    transcript.add_status(ev.content)
-                elif ev.event_type == "thought":
-                    transcript.add_thought(ev.agent_name or "Agent", ev.content)
-                elif ev.event_type == "message":
-                    transcript.add_agent_message(ev.agent_name or "Agent", ev.content)
-                elif ev.event_type == "gate_prompt":
-                    footer.update_status(agent=ev.agent_name, phase="Gate Awaiting Decision")
-                    transcript.add_agent_message(ev.agent_name or "Agent", ev.content)
-                    options = ev.data.get("options") if ev.data else None
-                    # Show modal dialog
-                    dialog = AskQuestionDialog(
-                        question=f"Decision required for {ev.agent_name}:",
-                        options=options,
-                    )
-                    user_decision = await self.push_screen_wait(dialog)
-                    transcript.add_status(
-                        f"Gate decision confirmed: {user_decision or 'Dismissed'}"
-                    )
-                elif ev.event_type == "done":
-                    footer.update_status(agent="IDLE", phase="Awaiting input")
+                await self._handle_event(ev, transcript, footer, prompt)
         except Exception as e:
-            transcript.add_agent_message("System", f"⚠️ **Error executing task**: {e}")
+            transcript.add_agent_message("System", f"**Error executing task**: {e}")
             footer.update_status(agent="ERROR", phase=str(e))

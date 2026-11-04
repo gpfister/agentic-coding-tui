@@ -35,6 +35,37 @@ RESPONSE_TO_INTENT = {
     "response 8": "mixed",
 }
 
+INTENT_TO_AGENT = {
+    "coding": "@coding",
+    "investigation": "@coding-investigate",
+    "monitoring": "@coding-monitor",
+    "research": "@coding-research",
+    "documentation": "@coding-document",
+    "grooming": "@coding-groom",
+    "inquiries": "GeneralAssistant",
+    "mixed": "root_triage",
+}
+
+INTENT_DESCRIPTIONS = {
+    "coding": "Software development / coding lifecycle",
+    "investigation": "Issue investigation & diagnostics",
+    "monitoring": "Telemetry & stream surveillance",
+    "research": "Topic & literature research",
+    "documentation": "Obsidian documentation & ADRs",
+    "grooming": "Project grooming & scoping",
+    "inquiries": "General inquiry (no changes)",
+    "mixed": "Mixed inquiry and task request",
+}
+
+
+class TriageCandidate(BaseModel):
+    """Candidate agent option with confidence score."""
+
+    intent: str = Field(description="Semantic intent target (e.g. coding, research)")
+    agent_name: str = Field(description="Agent identifier (e.g. @coding, @coding-investigate)")
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    description: str = Field(default="")
+
 
 class TriageResult(BaseModel):
     """Result of intent triage classification."""
@@ -45,6 +76,38 @@ class TriageResult(BaseModel):
     requires_confirmation: bool = Field(default=False)
     probabilities: dict[str, float] = Field(default_factory=dict)
     prompt_sanitized: str = Field(default="")
+    candidates: list[TriageCandidate] = Field(default_factory=list)
+
+
+def build_candidates(
+    primary_intent: str, primary_confidence: float, other_scores: dict[str, float] | None = None
+) -> list[TriageCandidate]:
+    """Construct ranked candidates list for intent options."""
+    all_intents = [
+        "coding",
+        "investigation",
+        "monitoring",
+        "research",
+        "documentation",
+        "grooming",
+        "inquiries",
+    ]
+    scores: dict[str, float] = {intent: 0.10 for intent in all_intents}
+    if other_scores:
+        scores.update(other_scores)
+    scores[primary_intent] = primary_confidence
+
+    candidates = [
+        TriageCandidate(
+            intent=intent,
+            agent_name=INTENT_TO_AGENT.get(intent, f"@{intent}"),
+            confidence=scores[intent],
+            description=INTENT_DESCRIPTIONS.get(intent, ""),
+        )
+        for intent in all_intents
+    ]
+    candidates.sort(key=lambda c: c.confidence, reverse=True)
+    return candidates
 
 
 def sanitize_prompt(prompt: str) -> str:
@@ -80,12 +143,14 @@ class TriageEngine:
         """Classify prompt intent using Laya Router or heuristic fallback."""
         cleaned = sanitize_prompt(raw_prompt)
         if not cleaned:
+            candidates = build_candidates("inquiries", 1.0)
             return TriageResult(
                 intent="inquiries",
                 confidence=1.0,
                 response_choice="response 1",
                 requires_confirmation=False,
                 prompt_sanitized="",
+                candidates=candidates,
             )
 
         # Try Laya Router prediction
@@ -105,14 +170,20 @@ class TriageEngine:
                     probs = ans.get("probabilities", {})
                     conf = probs.get(choice, ans.get("answer_confidence", 0.0))
                     intent = RESPONSE_TO_INTENT.get(choice, "inquiries")
-                    req_confirm = conf < CONFIDENCE_THRESHOLD
+                    prob_scores = {
+                        RESPONSE_TO_INTENT.get(k, "inquiries"): v for k, v in probs.items()
+                    }
+                    candidates = build_candidates(intent, conf, prob_scores)
+                    first_conf = candidates[0].confidence if candidates else conf
+                    req_confirm = first_conf < CONFIDENCE_THRESHOLD
                     return TriageResult(
-                        intent=intent,
-                        confidence=conf,
+                        intent=candidates[0].intent if candidates else intent,
+                        confidence=first_conf,
                         response_choice=choice,
                         requires_confirmation=req_confirm,
                         probabilities=probs,
                         prompt_sanitized=cleaned,
+                        candidates=candidates,
                     )
             except Exception as e:
                 logger.debug("Laya prediction error, falling back to heuristics: %s", e)
@@ -131,12 +202,14 @@ class TriageEngine:
             re.search(r"\b(build|implement|create|fix|scaffold|refactor|debug|test)\b", lower)
         )
         if has_question_word and has_task_word and len(lower.split()) > 15:
+            candidates = build_candidates("mixed", 0.85)
             return TriageResult(
                 intent="mixed",
                 confidence=0.85,
                 response_choice="response 8",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
         # Monitoring keywords
@@ -151,12 +224,14 @@ class TriageEngine:
                 "surveillance",
             ]
         ):
+            candidates = build_candidates("monitoring", 0.90)
             return TriageResult(
                 intent="monitoring",
                 confidence=0.90,
                 response_choice="response 3",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
         # Investigation keywords
@@ -171,12 +246,14 @@ class TriageEngine:
                 "why is this failing",
             ]
         ):
+            candidates = build_candidates("investigation", 0.88)
             return TriageResult(
                 intent="investigation",
                 confidence=0.88,
                 response_choice="response 4",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
         # Research keywords
@@ -190,12 +267,14 @@ class TriageEngine:
                 "find documentation for",
             ]
         ):
+            candidates = build_candidates("research", 0.88)
             return TriageResult(
                 intent="research",
                 confidence=0.88,
                 response_choice="response 5",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
         # Documentation keywords
@@ -210,12 +289,14 @@ class TriageEngine:
                 "changelog",
             ]
         ):
+            candidates = build_candidates("documentation", 0.88)
             return TriageResult(
                 intent="documentation",
                 confidence=0.88,
                 response_choice="response 6",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
         # Project Grooming keywords
@@ -230,12 +311,14 @@ class TriageEngine:
                 "grill me",
             ]
         ):
+            candidates = build_candidates("grooming", 0.88)
             return TriageResult(
                 intent="grooming",
                 confidence=0.88,
                 response_choice="response 7",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
         # Coding keywords
@@ -252,19 +335,48 @@ class TriageEngine:
                 "merge",
             ]
         ):
+            candidates = build_candidates("coding", 0.85)
             return TriageResult(
                 intent="coding",
                 confidence=0.85,
                 response_choice="response 2",
                 requires_confirmation=False,
                 prompt_sanitized=cleaned,
+                candidates=candidates,
             )
 
-        # Default inquiries
+        # Inquiries: question words or information-seeking prompts
+        if has_question_word or any(
+            w in lower for w in ["help", "explain", "info", "tell me", "what is", "how do"]
+        ):
+            candidates = build_candidates("inquiries", 0.75)
+            return TriageResult(
+                intent="inquiries",
+                confidence=0.75,
+                response_choice="response 1",
+                requires_confirmation=False,
+                prompt_sanitized=cleaned,
+                candidates=candidates,
+            )
+
+        # Ambiguous / Low confidence prompt: no candidate has confidence >= 0.4
+        low_candidates = build_candidates(
+            "inquiries",
+            0.25,
+            {
+                "coding": 0.20,
+                "investigation": 0.20,
+                "monitoring": 0.15,
+                "research": 0.15,
+                "documentation": 0.15,
+                "grooming": 0.15,
+            },
+        )
         return TriageResult(
-            intent="inquiries",
-            confidence=0.75,
+            intent=low_candidates[0].intent,
+            confidence=low_candidates[0].confidence,
             response_choice="response 1",
-            requires_confirmation=False,
+            requires_confirmation=True,
             prompt_sanitized=cleaned,
+            candidates=low_candidates,
         )

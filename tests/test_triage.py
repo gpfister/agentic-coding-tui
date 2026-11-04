@@ -61,3 +61,24 @@ def test_triage_mixed_intent():
         "Can you explain why the database connection is slow and also build and implement a complete fix with tests?"
     )
     assert res.intent == "mixed"
+
+
+def test_triage_candidates_and_confidence_threshold():
+    engine = TriageEngine(use_router=False)
+    res = engine.triage("Implement new user profile API with automated tests")
+    assert len(res.candidates) > 0
+    first_candidate = res.candidates[0]
+    assert first_candidate.intent == "coding"
+    assert first_candidate.agent_name == "@coding"
+    assert first_candidate.confidence >= 0.4
+    assert not res.requires_confirmation
+
+
+def test_triage_low_confidence_requires_selection():
+    engine = TriageEngine(use_router=False)
+    # Ambiguous prompt with no matching intent keywords
+    res = engine.triage("xyz ambiguous random token")
+    assert res.requires_confirmation
+    assert len(res.candidates) > 0
+    # Top candidate confidence must be < 0.4
+    assert res.candidates[0].confidence < 0.4

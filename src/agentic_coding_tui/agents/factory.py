@@ -39,7 +39,12 @@ class AgentFactory:
 
     def create_domain_agent(self, intent: str) -> Any | None:
         """Instantiate domain worker agent corresponding to intent."""
-        if intent == "investigation":
+        if intent in ("coding", "@coding"):
+            from agentic_coding_tui.agents.coding_agents import CodingAgent
+
+            return CodingAgent(self.config_manager, self.tool_registry)
+
+        if intent in ("investigation", "@coding-investigate"):
             from agentic_coding_tui.agents.investigate import IssueInvestigationAgent
 
             return IssueInvestigationAgent(self.config_manager, self.tool_registry)

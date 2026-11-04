@@ -12,15 +12,15 @@ class TaskSubagentFooter(Container):
 
     DEFAULT_CSS = """
     TaskSubagentFooter {
-        dock: bottom;
-        height: 3;
-        background: $panel;
-        border-top: heavy $primary;
+        height: 2;
+        background: transparent;
+        border-top: solid $primary;
         padding: 0 1;
     }
 
     #status-row {
-        height: 100%;
+        height: 1;
+        background: transparent;
         align: left middle;
     }
 
@@ -50,9 +50,9 @@ class TaskSubagentFooter(Container):
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="status-row"):
-            yield Static(f"🤖 Agent: {self.active_agent}", id="status-subagent")
-            yield Static(f"⚡ Phase: {self.current_phase}", id="status-phase")
-            yield Static(f"🧠 Model: {self.model_name}", id="status-metrics")
+            yield Static(f"Agent: {self.active_agent}", id="status-subagent")
+            yield Static(f"Phase: {self.current_phase}", id="status-phase")
+            yield Static(f"Model: {self.model_name}", id="status-metrics")
 
     def update_status(
         self,
@@ -63,10 +63,10 @@ class TaskSubagentFooter(Container):
         """Update live status fields."""
         if agent is not None:
             self.active_agent = agent
-            self.query_one("#status-subagent", Static).update(f"🤖 Agent: {self.active_agent}")
+            self.query_one("#status-subagent", Static).update(f"Agent: {self.active_agent}")
         if phase is not None:
             self.current_phase = phase
-            self.query_one("#status-phase", Static).update(f"⚡ Phase: {self.current_phase}")
+            self.query_one("#status-phase", Static).update(f"Phase: {self.current_phase}")
         if model is not None:
             self.model_name = model
-            self.query_one("#status-metrics", Static).update(f"🧠 Model: {self.model_name}")
+            self.query_one("#status-metrics", Static).update(f"Model: {self.model_name}")

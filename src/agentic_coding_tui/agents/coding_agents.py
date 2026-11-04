@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator
+from typing import Any
 
 from agentic_coding_tui.config import ConfigManager
 from agentic_coding_tui.core.dispatcher import DispatchEvent
@@ -143,3 +144,58 @@ class CodingMergeAgent(BaseCodingWorker):
             agent_name=self.name,
             content=f"Release complete for: {prompt}.",
         )
+
+
+class CodingAgent:
+    """The @coding agent implementing the Google ADK graph workflow."""
+
+    name: str = "coding"
+    display_name: str = "@coding"
+    role: str = "Coding Lifecycle Graph Orchestrator"
+
+    def __init__(
+        self,
+        config_manager: ConfigManager | None = None,
+        tool_registry: ToolRegistry | None = None,
+        orchestrator: Any | None = None,
+    ):
+        self.config_manager = config_manager or ConfigManager()
+        self.tool_registry = tool_registry or ToolRegistry(exclude_invoke=True)
+        if orchestrator is not None:
+            self.orchestrator = orchestrator
+        else:
+            from agentic_coding_tui.workflows.coding_graph import CodingWorkflowOrchestrator
+
+            self.orchestrator = CodingWorkflowOrchestrator(
+                config_manager=self.config_manager,
+                tool_registry=self.tool_registry,
+            )
+
+    @property
+    def is_active(self) -> bool:
+        return getattr(self.orchestrator, "is_active", False)
+
+    @property
+    def is_idle(self) -> bool:
+        return getattr(self.orchestrator, "is_awaiting_input", False)
+
+    @property
+    def active_subagent(self) -> str | None:
+        return getattr(self.orchestrator, "active_agent", None)
+
+    async def execute(self, prompt: str) -> AsyncIterator[DispatchEvent]:
+        """Execute the graph workflow for the prompt."""
+        async for ev in self.orchestrator.run(prompt):
+            yield ev
+
+    async def send_input(self, user_input: str) -> AsyncIterator[DispatchEvent]:
+        """Send input to the active subagent in the workflow when in idle mode."""
+        async for ev in self.orchestrator.send_input(user_input):
+            yield ev
+
+    def pause_awaiting_input(self, agent_name: str | None = None) -> None:
+        """Mark active agent in workflow as awaiting user input (idle mode)."""
+        self.orchestrator.pause_awaiting_input(agent_name)
+
+    def reset(self) -> None:
+        self.orchestrator.reset()

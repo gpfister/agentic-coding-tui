@@ -14,15 +14,15 @@ class AskQuestionDialog(ModalScreen[str | None]):
     DEFAULT_CSS = """
     AskQuestionDialog {
         align: center middle;
-        background: rgba(0, 0, 0, 0.7);
+        background: transparent;
     }
 
     #dialog-box {
         width: 70;
         height: auto;
         max-height: 24;
-        background: $surface;
-        border: thick $accent;
+        background: transparent;
+        border: solid $accent;
         padding: 1 2;
     }
 
@@ -33,16 +33,29 @@ class AskQuestionDialog(ModalScreen[str | None]):
     }
 
     #options-container {
+        background: transparent;
         margin-bottom: 1;
+    }
+
+    RadioSet {
+        background: transparent;
+        border: none;
+    }
+
+    RadioButton {
+        background: transparent;
     }
 
     #dialog-buttons {
         align: right middle;
         height: 3;
+        background: transparent;
     }
 
     Button {
         margin-left: 1;
+        background: transparent;
+        border: solid $primary;
     }
     """
 
